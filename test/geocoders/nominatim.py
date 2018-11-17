@@ -1,8 +1,7 @@
 import warnings
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 
 from mock import patch
-from six import with_metaclass
 
 import geopy.geocoders
 from geopy.compat import u
@@ -11,7 +10,7 @@ from geopy.point import Point
 from test.geocoders.util import GeocoderTestBase
 
 
-class BaseNominatimTestCase(with_metaclass(ABCMeta, object)):
+class BaseNominatimTestCase(ABC):
     # Common test cases for Nominatim-based geocoders.
     # Assumes that Nominatim uses the OSM data.
 
