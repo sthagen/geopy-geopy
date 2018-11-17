@@ -2,7 +2,6 @@ import unittest
 import warnings
 
 from geopy import exc
-from geopy.compat import u
 from geopy.geocoders import ArcGIS
 from geopy.point import Point
 from test.geocoders.util import GeocoderTestBase, env
@@ -56,7 +55,7 @@ class ArcGISTestCase(GeocoderTestBase):
         ArcGIS.geocode unicode
         """
         self.geocode_run(
-            {"query": u("\u6545\u5bab")},
+            {"query": "\u6545\u5bab"},
             {"latitude": 39.916, "longitude": 116.390},
         )
 

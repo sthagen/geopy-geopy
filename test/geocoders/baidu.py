@@ -1,7 +1,5 @@
-
 import unittest
 
-from geopy.compat import u
 from geopy.exc import GeocoderAuthenticationFailure
 from geopy.geocoders import Baidu
 from geopy.point import Point
@@ -28,7 +26,7 @@ class BaiduQueriesTestCaseMixin:
         Baidu.geocode
         """
         self.geocode_run(
-            {"query": u(
+            {"query": (
                 "\u5317\u4eac\u5e02\u6d77\u6dc0\u533a"
                 "\u4e2d\u5173\u6751\u5927\u885727\u53f7"
             )},
@@ -65,7 +63,7 @@ class BaiduTestCase(BaiduQueriesTestCaseMixin, GeocoderTestBase):
     def test_invalid_ak(self):
         self.geocoder = Baidu(api_key='DUMMYKEY1234')
         with self.assertRaises(GeocoderAuthenticationFailure) as cm:
-            self.geocode_run({"query": u("baidu")}, None)
+            self.geocode_run({"query": "baidu"}, None)
         self.assertEqual(str(cm.exception), 'Invalid AK')
 
 
@@ -85,7 +83,7 @@ class BaiduSKTestCase(BaiduQueriesTestCaseMixin, GeocoderTestBase):
 
     def test_sn_with_peculiar_chars(self):
         self.geocode_run(
-            {"query": u(
+            {"query": (
                 "\u5317\u4eac\u5e02\u6d77\u6dc0\u533a"
                 "\u4e2d\u5173\u6751\u5927\u885727\u53f7"
                 " ' & = , ? %"

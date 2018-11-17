@@ -7,7 +7,6 @@ from geopy.compat import (
     Request,
     build_opener,
     iteritems,
-    u,
     urlencode,
 )
 from geopy.exc import ConfigurationError, GeocoderQueryError
@@ -417,7 +416,6 @@ class IGNFrance(Geocoder):
         def remove_namespace(doc, namespace):
             """Remove namespace in the document in place."""
             ns = '{%s}' % namespace
-            ns = u(ns)
             nsl = len(ns)
             for elem in doc.getiterator():
                 if elem.tag.startswith(ns):

@@ -4,7 +4,6 @@ import uuid
 import pytz
 
 from geopy import Point
-from geopy.compat import u
 from geopy.exc import GeocoderAuthenticationFailure, GeocoderQueryError
 from geopy.geocoders import GeoNames
 from test.geocoders.util import GeocoderTestBase, env
@@ -49,11 +48,11 @@ class GeoNamesTestCase(GeocoderTestBase):
 
     def test_query_urlencoding(self):
         location = self.geocode_run(
-            {"query": u("Ry\u016b\u014d")},
+            {"query": "Ry\u016b\u014d"},
             {"latitude": 35.65, "longitude": 138.5},
             skiptest_on_failure=True,  # sometimes the result is empty
         )
-        self.assertIn(u("Ry\u016b\u014d"), location.address)
+        self.assertIn("Ry\u016b\u014d", location.address)
 
     def test_reverse(self):
         location = self.reverse_run(
@@ -106,7 +105,7 @@ class GeoNamesTestCase(GeocoderTestBase):
             },
             {},
         )
-        self.assertIn(u'Берлин, Германия', location.address)
+        self.assertIn('Берлин, Германия', location.address)
 
     def test_reverse_find_nearby_raises_for_lang(self):
         with self.assertRaises(ValueError):

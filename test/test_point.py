@@ -8,7 +8,6 @@ import sys
 import unittest
 import warnings
 
-from geopy.compat import u
 from geopy.point import Point
 
 
@@ -45,7 +44,7 @@ class PointTestCase(unittest.TestCase):
         """
         Point() str degrees, minutes &c
         """
-        point = Point(u("UT: N 39\xb020' 0'' / W 74\xb035' 0''"))
+        point = Point("UT: N 39\xb020' 0'' / W 74\xb035' 0''")
         self.assertEqual(point.latitude, 39.333333333333336)
         self.assertEqual(point.longitude, -74.58333333333333)
         self.assertEqual(point.altitude, 0)
@@ -87,7 +86,7 @@ class PointTestCase(unittest.TestCase):
                          (23.439444444444444, 23.458333333333332, 0.0))
         self.assertEqual(Point("23 26' 22\" N 23 27' 30\" E"),
                          (23.439444444444444, 23.458333333333332, 0.0))
-        self.assertEqual(Point(u("UT: N 39\xb020' 0'' / W 74\xb035' 0''")),
+        self.assertEqual(Point("UT: N 39\xb020' 0'' / W 74\xb035' 0''"),
                          (39.333333333333336, -74.58333333333333, 0.0))
 
     def test_point_format_altitude(self):

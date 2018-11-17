@@ -1,6 +1,5 @@
 import unittest
 
-from geopy.compat import u
 from geopy.geocoders import Here
 from geopy.point import Point
 from test.geocoders.util import GeocoderTestBase, env
@@ -76,7 +75,7 @@ class HereTestCase(GeocoderTestBase):
         Here.geocode unicode in Japanese for Paris. (POIs not included.)
         """
         self.geocode_run(
-            {"query": u("\u30d1\u30ea")},
+            {"query": "\u30d1\u30ea"},
             {"latitude": 48.85718, "longitude": 2.34141}
         )
 
