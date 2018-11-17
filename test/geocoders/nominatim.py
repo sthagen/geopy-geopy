@@ -122,7 +122,7 @@ class BaseNominatimTestCase(ABC):
     def test_reverse_language_parameter(self):
         query = "52.51693903613385, 13.3859332733135"
         result_reverse_de = self.reverse_run(
-            {"query": query, "exactly_one": True, "language": "de"},
+            {"query": query, "language": "de"},
             {},
         )
         self.assertEqual(
@@ -131,7 +131,7 @@ class BaseNominatimTestCase(ABC):
         )
 
         result_reverse_en = self.reverse_run(
-            {"query": query, "exactly_one": True, "language": "en"},
+            {"query": query, "language": "en"},
             {},
         )
         self.assertTrue(

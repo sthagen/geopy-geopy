@@ -29,7 +29,7 @@ class MapBoxTestCase(GeocoderTestBase):
     def test_reverse(self):
         new_york_point = Point(40.75376406311989, -73.98489005863667)
         location = self.reverse_run(
-            {"query": new_york_point, "exactly_one": True},
+            {"query": new_york_point},
             {"latitude": 40.7537640, "longitude": -73.98489, "delta": 1},
         )
         self.assertIn("New York", location.address)

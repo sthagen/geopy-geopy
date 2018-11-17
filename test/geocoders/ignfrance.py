@@ -87,8 +87,7 @@ class IGNFranceTestCase(GeocoderTestBase):
         """
         self.geocode_run(
             {"query": "44109000EX0114",
-             "query_type": "CadastralParcel",
-             "exactly_one": True},
+             "query_type": "CadastralParcel"},
             {"latitude": 47.222482, "longitude": -1.556303},
         )
 
@@ -98,8 +97,7 @@ class IGNFranceTestCase(GeocoderTestBase):
         """
         self.geocode_run(
             {"query": "Camp des Landes, 41200 VILLEFRANCHE-SUR-CHER",
-             "query_type": "StreetAddress",
-             "exactly_one": True},
+             "query_type": "StreetAddress"},
             {"latitude": 47.293048,
              "longitude": 1.718985,
              "address": "le camp des landes, 41200 Villefranche-sur-Cher"},
@@ -112,8 +110,7 @@ class IGNFranceTestCase(GeocoderTestBase):
         self.geocode_run(
             {"query": "8 rue Général Buat, Nantes",
              "query_type": "StreetAddress",
-             "is_freeform": True,
-             "exactly_one": True},
+             "is_freeform": True},
             {"address": "8 r general buat , 44000 Nantes"},
         )
 
@@ -212,8 +209,7 @@ class IGNFranceTestCase(GeocoderTestBase):
         IGNFrance.reverse simple
         """
         res = self.reverse_run(
-            {"query": '47.229554,-1.541519',
-             "exactly_one": True},
+            {"query": '47.229554,-1.541519'},
             {},
         )
         self.assertEqual(
@@ -228,7 +224,6 @@ class IGNFranceTestCase(GeocoderTestBase):
         with self.assertRaises(GeocoderQueryError):
             self.geocoder.reverse(
                 query='47.229554,-1.541519',
-                exactly_one=True,
                 reverse_geocode_preference=['a']
             )
 

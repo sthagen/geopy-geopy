@@ -58,7 +58,6 @@ class GeoNamesTestCase(GeocoderTestBase):
         location = self.reverse_run(
             {
                 "query": "40.75376406311989, -73.98489005863667",
-                "exactly_one": True,
             },
             {
                 "latitude": 40.75376406311989,
@@ -79,7 +78,6 @@ class GeoNamesTestCase(GeocoderTestBase):
             self.reverse_run(
                 {
                     "query": "40.75376406311989, -73.98489005863667",
-                    "exactly_one": True,
                     "feature_code": "ADM1",
                 },
                 {},
@@ -89,7 +87,6 @@ class GeoNamesTestCase(GeocoderTestBase):
             self.reverse_run(
                 {
                     "query": "40.75376406311989, -73.98489005863667",
-                    "exactly_one": True,
                     "feature_code": "ADM1",
                     "find_nearby_type": "findNearbyPlaceName",
                 },
@@ -100,7 +97,6 @@ class GeoNamesTestCase(GeocoderTestBase):
         location = self.reverse_run(
             {
                 "query": "52.50, 13.41",
-                "exactly_one": True,
                 "lang": 'ru',
             },
             {},
@@ -112,7 +108,6 @@ class GeoNamesTestCase(GeocoderTestBase):
             self.reverse_run(
                 {
                     "query": "40.75376406311989, -73.98489005863667",
-                    "exactly_one": True,
                     "find_nearby_type": 'findNearby',
                     "lang": 'en',
                 },
@@ -123,7 +118,6 @@ class GeoNamesTestCase(GeocoderTestBase):
         location = self.reverse_run(
             {
                 "query": "40.75376406311989, -73.98489005863667",
-                "exactly_one": True,
                 "find_nearby_type": 'findNearby',
             },
             {
@@ -137,7 +131,6 @@ class GeoNamesTestCase(GeocoderTestBase):
         self.reverse_run(
             {
                 "query": "40.75376406311989, -73.98489005863667",
-                "exactly_one": True,
                 "find_nearby_type": 'findNearby',
                 "feature_code": "ADM1",
             },
@@ -152,7 +145,6 @@ class GeoNamesTestCase(GeocoderTestBase):
             self.reverse_run(
                 {
                     "query": "40.75376406311989, -73.98489005863667",
-                    "exactly_one": True,
                     "find_nearby_type": "findSomethingNonExisting",
                 },
                 {},
