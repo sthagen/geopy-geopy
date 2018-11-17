@@ -13,8 +13,6 @@ class GeocodeEarth(Pelias):
             self,
             api_key,
             format_string=None,
-            boundary_rect=None,
-            country_bias=None,
             domain='api.geocode.earth',
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
@@ -27,21 +25,6 @@ class GeocodeEarth(Pelias):
 
         :param str format_string:
             See :attr:`geopy.geocoders.options.default_format_string`.
-
-        :type boundary_rect: list or tuple of 2 items of :class:`geopy.point.Point`
-            or ``(latitude, longitude)`` or ``"%(latitude)s, %(longitude)s"``.
-        :param boundary_rect: Coordinates to restrict search within.
-            Example: ``[Point(22, 180), Point(-22, -180)]``.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `boundary_rect` instead.
-
-        :param str country_bias: Bias results to this country (ISO alpha-3).
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `country_bias` instead.
 
         :param str domain: Specify a custom domain for Pelias API.
 
@@ -65,8 +48,6 @@ class GeocodeEarth(Pelias):
         super().__init__(
             api_key=api_key,
             format_string=format_string,
-            boundary_rect=boundary_rect,
-            country_bias=country_bias,
             domain=domain,
             timeout=timeout,
             proxies=proxies,

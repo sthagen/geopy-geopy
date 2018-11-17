@@ -19,9 +19,6 @@ class OpenMapQuest(Nominatim):
             self,
             api_key=None,
             format_string=None,
-            view_box=None,
-            bounded=None,
-            country_bias=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             domain='open.mapquestapi.com',
@@ -35,30 +32,6 @@ class OpenMapQuest(Nominatim):
 
         :param str format_string:
             See :attr:`geopy.geocoders.options.default_format_string`.
-
-        :type view_box: list or tuple of 2 items of :class:`geopy.point.Point` or
-            ``(latitude, longitude)`` or ``"%(latitude)s, %(longitude)s"``.
-        :param view_box: Coordinates to restrict search within.
-            Example: ``[Point(22, 180), Point(-22, -180)]``.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `viewbox` instead.
-
-        :param bool bounded: Restrict the results to only items contained
-            within the bounding view_box.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `bounded` instead.
-
-        :type country_bias: str or list
-        :param country_bias: Limit search results to a specific country.
-            This param sets a default value for the `geocode`'s ``country_codes``.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `country_codes` instead.
 
         :param int timeout:
             See :attr:`geopy.geocoders.options.default_timeout`.
@@ -81,9 +54,6 @@ class OpenMapQuest(Nominatim):
         """
         super().__init__(
             format_string=format_string,
-            view_box=view_box,
-            bounded=bounded,
-            country_bias=country_bias,
             timeout=timeout,
             proxies=proxies,
             domain=domain,

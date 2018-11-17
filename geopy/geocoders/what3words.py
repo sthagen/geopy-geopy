@@ -27,7 +27,6 @@ class What3Words(Geocoder):
             self,
             api_key,
             format_string=None,
-            scheme='https',
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
@@ -40,14 +39,6 @@ class What3Words(Geocoder):
 
         :param str format_string:
             See :attr:`geopy.geocoders.options.default_format_string`.
-
-        :param str scheme: Must be ``https``.
-
-            .. deprecated:: 1.15.0
-               API v2 requires https. Don't use this parameter,
-               it's going to be removed in geopy 2.0.
-               Scheme other than ``https`` would result in a
-               :class:`geopy.exc.ConfigurationError` being thrown.
 
         :param int timeout:
             See :attr:`geopy.geocoders.options.default_timeout`.
@@ -64,17 +55,12 @@ class What3Words(Geocoder):
         """
         super().__init__(
             format_string=format_string,
-            # The `scheme` argument is present for the legacy reasons only.
-            # If a custom value has been passed, it should be validated.
-            # Otherwise use `https` instead of the `options.default_scheme`.
-            scheme=(scheme or 'https'),
+            scheme='https',
             timeout=timeout,
             proxies=proxies,
             user_agent=user_agent,
             ssl_context=ssl_context,
         )
-        if self.scheme != "https":
-            raise exc.ConfigurationError("What3Words now requires `https`.")
 
         self.api_key = api_key
         domain = 'api.what3words.com'

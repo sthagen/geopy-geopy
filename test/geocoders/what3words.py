@@ -17,18 +17,9 @@ class What3WordsTestCaseUnitTest(GeocoderTestBase):
         )
         self.assertEqual(geocoder.headers['User-Agent'], 'my_user_agent/1.0')
 
-    def test_http_scheme_is_disallowed(self):
-        with self.assertRaises(geopy.exc.ConfigurationError):
-            What3Words(
-                api_key=self.dummy_api_key,
-                scheme='http',
-            )
-
     @patch.object(geopy.geocoders.options, 'default_scheme', 'http')
     def test_default_scheme_is_ignored(self):
         geocoder = What3Words(api_key=self.dummy_api_key)
-        self.assertEqual(geocoder.scheme, 'https')
-        geocoder = What3Words(api_key=self.dummy_api_key, scheme=None)
         self.assertEqual(geocoder.scheme, 'https')
 
 
@@ -41,9 +32,7 @@ class What3WordsTestCase(GeocoderTestBase):
     def setUpClass(cls):
         cls.geocoder = What3Words(
             env['WHAT3WORDS_KEY'],
-            scheme='https',
             timeout=3
-
         )
         cls.delta = 0.7
 

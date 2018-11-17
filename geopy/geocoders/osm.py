@@ -46,9 +46,6 @@ class Nominatim(Geocoder):
     def __init__(
             self,
             format_string=None,
-            view_box=None,
-            bounded=None,
-            country_bias=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             domain=_DEFAULT_NOMINATIM_DOMAIN,
@@ -61,30 +58,6 @@ class Nominatim(Geocoder):
         """
         :param str format_string:
             See :attr:`geopy.geocoders.options.default_format_string`.
-
-        :type view_box: list or tuple of 2 items of :class:`geopy.point.Point` or
-            ``(latitude, longitude)`` or ``"%(latitude)s, %(longitude)s"``.
-        :param view_box: Coordinates to restrict search within.
-            Example: ``[Point(22, 180), Point(-22, -180)]``.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `viewbox` instead.
-
-        :param bool bounded: Restrict the results to only items contained
-            within the bounding view_box.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `bounded` instead.
-
-        :type country_bias: str or list
-        :param country_bias: Limit search results to a specific country.
-            This param sets a default value for the `geocode`'s ``country_codes``.
-
-            .. deprecated:: 1.19.0
-                This argument will be removed in geopy 2.0.
-                Use `geocode`'s `country_codes` instead.
 
         :param int timeout:
             See :attr:`geopy.geocoders.options.default_timeout`.
@@ -113,39 +86,6 @@ class Nominatim(Geocoder):
             user_agent=user_agent,
             ssl_context=ssl_context,
         )
-
-        if country_bias is not None:
-            warnings.warn(
-                '`country_bias` argument of the %(cls)s.__init__ '
-                'is deprecated and will be removed in geopy 2.0. Use '
-                '%(cls)s.geocode(country_codes=%(value)r) instead.'
-                % dict(cls=type(self).__name__, value=country_bias),
-                DeprecationWarning,
-                stacklevel=2
-            )
-        self.country_bias = country_bias
-
-        if view_box is not None:
-            warnings.warn(
-                '`view_box` argument of the %(cls)s.__init__ '
-                'is deprecated and will be removed in geopy 2.0. Use '
-                '%(cls)s.geocode(viewbox=%(value)r) instead.'
-                % dict(cls=type(self).__name__, value=view_box),
-                DeprecationWarning,
-                stacklevel=2
-            )
-        self.view_box = view_box
-
-        if bounded is not None:
-            warnings.warn(
-                '`bounded` argument of the %(cls)s.__init__ '
-                'is deprecated and will be removed in geopy 2.0. Use '
-                '%(cls)s.geocode(bounded=%(value)r) instead.'
-                % dict(cls=type(self).__name__, value=bounded),
-                DeprecationWarning,
-                stacklevel=2
-            )
-        self.bounded = bounded
 
         self.domain = domain.strip('/')
 
@@ -196,7 +136,7 @@ class Nominatim(Geocoder):
             extratags=False,
             country_codes=None,
             viewbox=None,
-            bounded=None,  # TODO: change default value to `False` in geopy 2.0
+            bounded=False,
     ):
         """
         Return a location point by address.
@@ -256,7 +196,7 @@ class Nominatim(Geocoder):
             Example: ``[Point(22, 180), Point(-22, -180)]``.
 
         :param bool bounded: Restrict the results to only items contained
-            within the bounding view_box. Defaults to `False`.
+            within the bounding view_box.
 
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
@@ -285,8 +225,6 @@ class Nominatim(Geocoder):
                 raise ValueError("Limit cannot be less than 1")
             params['limit'] = limit
 
-        if viewbox is None:
-            viewbox = self.view_box
         if viewbox:
             if len(viewbox) == 4:
                 warnings.warn(
@@ -303,13 +241,9 @@ class Nominatim(Geocoder):
             params['viewbox'] = self._format_bounding_box(
                 viewbox, "%(lon1)s,%(lat1)s,%(lon2)s,%(lat2)s")
 
-        if bounded is None:
-            bounded = self.bounded
         if bounded:
             params['bounded'] = 1
 
-        if country_codes is None:
-            country_codes = self.country_bias
         if not country_codes:
             country_codes = []
         if isinstance(country_codes, str):
