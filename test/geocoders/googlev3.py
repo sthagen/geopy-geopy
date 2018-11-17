@@ -31,19 +31,6 @@ class GoogleV3TestCase(GeocoderTestBase):
         else:
             self.assertEqual(timezone.pytz_timezone, expected)
 
-        # `timezone` method is deprecated, but we still support it.
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            if 'query' in payload:
-                payload['location'] = payload['query']
-                del payload['query']
-            pytz_timezone = self._make_request(self.geocoder.timezone, **payload)
-            if expected is None:
-                self.assertIsNone(pytz_timezone)
-            else:
-                self.assertEqual(pytz_timezone, expected)
-            self.assertLess(0, len(w))
-
         return timezone
 
     def test_user_agent_custom(self):
