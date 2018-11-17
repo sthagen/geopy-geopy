@@ -1,6 +1,5 @@
 import functools
 import json
-import warnings
 from socket import timeout as SocketTimeout
 from ssl import SSLError
 from urllib.error import HTTPError
@@ -229,22 +228,12 @@ class Geocoder:
         Do the right thing on "point" input. For geocoders with reverse
         methods.
         """
-        try:
-            if not isinstance(point, Point):
-                point = Point(point)
-        except ValueError as e:
-            if isinstance(point, str):
-                warnings.warn(
-                    'Unable to parse the string as Point: "%s". Using the value '
-                    'as-is for the query. In geopy 2.0 this will become an '
-                    'exception.' % str(e), DeprecationWarning, stacklevel=3
-                )
-                return point
-            raise
-        else:
-            # Altitude is silently dropped.
-            return output_format % dict(lat=point.latitude,
-                                        lon=point.longitude)
+        if not isinstance(point, Point):
+            point = Point(point)
+
+        # Altitude is silently dropped.
+        return output_format % dict(lat=point.latitude,
+                                    lon=point.longitude)
 
     @staticmethod
     def _format_bounding_box(bbox, output_format="%(lat1)s,%(lon1)s,%(lat2)s,%(lon2)s"):
