@@ -4,9 +4,8 @@ Test ability to proxy requests.
 import os
 import ssl
 import unittest
-from urllib.request import getproxies
+from urllib.request import getproxies, urlopen
 
-from geopy.compat import urlopen
 from geopy.exc import GeocoderServiceError
 from geopy.geocoders.base import Geocoder
 from test.proxy_server import ProxyServerThread
@@ -67,10 +66,6 @@ class ProxyTestCase(unittest.TestCase):
         )
         self.assertEqual(1, len(self.proxy_server.requests))
 
-    @unittest.skipUnless(
-        hasattr(ssl, 'create_default_context'),
-        "The current Python version doesn't support `ssl.create_default_context`."
-    )
     def test_ssl_context_with_proxy_is_respected(self):
         # Create an ssl context which should not allow the negotiation with
         # the `self.remote_website_https`.
