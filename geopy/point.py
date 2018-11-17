@@ -253,11 +253,6 @@ class Point:
     def __str__(self):
         return self.format()
 
-    def __unicode__(self):
-        return self.format(
-            None, DEGREE, PRIME, DOUBLE_PRIME
-        )
-
     def __eq__(self, other):
         if not isinstance(other, collections.Iterable):
             return NotImplemented
