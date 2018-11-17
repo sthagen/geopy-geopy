@@ -10,7 +10,6 @@ from geopy.compat import (
     Request,
     URLError,
     build_opener_with_context,
-    py3k,
     string_compare,
 )
 from geopy.exc import (
@@ -355,12 +354,9 @@ class Geocoder:
             page = requester(req, timeout=timeout, **kwargs)
         except Exception as error:
             message = (
-                str(error) if not py3k
-                else (
-                    str(error.args[0])
-                    if len(error.args)
-                    else str(error)
-                )
+                str(error.args[0])
+                if len(error.args)
+                else str(error)
             )
             self._geocoder_exception_handler(error, message)
             if isinstance(error, HTTPError):
