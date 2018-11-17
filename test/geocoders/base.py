@@ -106,12 +106,9 @@ class GeocoderTestCase(unittest.TestCase):
             args, kwargs = mock_urlopen.call_args
             self.assertEqual(kwargs['timeout'], 7)
 
-            with warnings.catch_warnings(record=True) as w:
-                warnings.simplefilter('always')
-                g._call_geocoder(url, timeout=None, raw=True)
-                args, kwargs = mock_urlopen.call_args
-                self.assertEqual(kwargs['timeout'], 12)
-                self.assertEqual(1, len(w))
+            g._call_geocoder(url, timeout=None, raw=True)
+            args, kwargs = mock_urlopen.call_args
+            self.assertIsNone(kwargs['timeout'])
 
     def test_ssl_context(self):
 
