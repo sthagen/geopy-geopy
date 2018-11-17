@@ -146,7 +146,7 @@ def lonlat(x, y, z=0):
     return Point(y, x, z)
 
 
-class Distance(object):
+class Distance:
     """
     Base for :class:`.great_circle`, :class:`.vincenty`, and
     :class:`.geodesic`.

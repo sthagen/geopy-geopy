@@ -25,7 +25,7 @@ SOUTH_POLE = Point(-90, 0)
 FIJI = Point(-16.1333333, 180.0)  # Vunikondi, Fiji
 
 
-class CommonDistanceComputationCases(object):
+class CommonDistanceComputationCases:
 
     cls = None
 
@@ -127,7 +127,7 @@ class CommonDistanceComputationCases(object):
             self.assertEqual(1, len(w))
 
 
-class CommonMathematicalOperatorCases(object):
+class CommonMathematicalOperatorCases:
 
     cls = None
 
@@ -180,7 +180,7 @@ class CommonMathematicalOperatorCases(object):
         self.assertEqual(distance1.kilometers, distance2.kilometers)
 
 
-class CommonConversionCases(object):
+class CommonConversionCases:
 
     cls = None
 
@@ -227,7 +227,7 @@ class CommonConversionCases(object):
         self.assertAlmostEqual(self.cls(nautical=1.0).km, 1.8520000)
 
 
-class CommonComparisonCases(object):
+class CommonComparisonCases:
 
     cls = None
 
