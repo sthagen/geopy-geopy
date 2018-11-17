@@ -5,7 +5,6 @@ Compatibility...
 import inspect
 import sys
 import warnings
-from math import isfinite
 from urllib.error import HTTPError
 from urllib.parse import parse_qs, quote, quote_plus, urlencode, urlparse
 from urllib.request import (
@@ -19,14 +18,9 @@ from urllib.request import (
     urlopen,
 )
 
-string_compare = str
-text_type = str
-
 
 def cmp(a, b):
     return (a > b) - (a < b)
-
-
 
 
 def itervalues(d):
