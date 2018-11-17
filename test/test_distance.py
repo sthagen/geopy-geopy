@@ -4,8 +4,7 @@ Test distance formulas
 import math
 import unittest
 import warnings
-
-from mock import patch
+from unittest.mock import patch
 
 from geopy.distance import (
     EARTH_RADIUS,

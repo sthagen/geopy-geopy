@@ -1,6 +1,5 @@
 import unittest
-
-from mock import patch
+from unittest.mock import patch
 
 import geopy.geocoders
 from geopy.exc import ConfigurationError

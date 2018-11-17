@@ -1,7 +1,6 @@
 import warnings
 from abc import ABC, abstractmethod
-
-from mock import patch
+from unittest.mock import patch
 
 import geopy.geocoders
 from geopy.compat import u
