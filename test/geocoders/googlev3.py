@@ -281,15 +281,6 @@ class GoogleV3TestCase(GeocoderTestBase):
             {"latitude": 51.52, "longitude": -0.15},
         )
 
-    def test_geocode_bounds_deprecated(self):
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter('always')
-            self.geocode_run(
-                {"query": "221b Baker St", "bounds": [50, -2, 55, 2]},
-                {"latitude": 51.52, "longitude": -0.15},
-            )
-            self.assertEqual(1, len(w))
-
     def test_geocode_bounds_invalid(self):
         """
         GoogleV3.geocode bounds must be 4-length iterable
