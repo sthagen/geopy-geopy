@@ -86,8 +86,6 @@ calculate the length of a path::
     3277.30439191
 
 """
-from __future__ import division
-
 import warnings
 from math import asin, atan, atan2, cos, pi, sin, sqrt, tan
 
