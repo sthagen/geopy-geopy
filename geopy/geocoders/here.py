@@ -2,6 +2,7 @@
 :class:`.Here` geocoder.
 """
 
+import collections.abc
 from urllib.parse import urlencode
 
 from geopy.exc import (
@@ -163,7 +164,7 @@ class Here(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        if isinstance(query, dict):
+        if isinstance(query, collections.abc.Mapping):
             params = {
                 key: val
                 for key, val

@@ -1,3 +1,4 @@
+import collections.abc
 import warnings
 from urllib.parse import urlencode
 
@@ -301,7 +302,7 @@ class Nominatim(Geocoder):
 
         """
 
-        if isinstance(query, dict):
+        if isinstance(query, collections.abc.Mapping):
             params = {
                 key: val
                 for key, val
@@ -464,7 +465,7 @@ class Nominatim(Geocoder):
     def _parse_json(self, places, exactly_one):
         if not places:
             return None
-        if not isinstance(places, list):
+        if not isinstance(places, collections.abc.Sequence):
             places = [places]
         if exactly_one:
             return self.parse_code(places[0])
