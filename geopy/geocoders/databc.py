@@ -40,18 +40,12 @@ class DataBC(Geocoder):
         :param str user_agent:
             See :attr:`geopy.geocoders.options.default_user_agent`.
 
-            .. versionadded:: 1.12.0
-
         :param str format_string:
             See :attr:`geopy.geocoders.options.default_format_string`.
-
-            .. versionadded:: 1.14.0
 
         :type ssl_context: :class:`ssl.SSLContext`
         :param ssl_context:
             See :attr:`geopy.geocoders.options.default_ssl_context`.
-
-            .. versionadded:: 1.14.0
         """
         super().__init__(
             format_string=format_string,

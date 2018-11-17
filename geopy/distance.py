@@ -359,8 +359,6 @@ class geodesic(Distance):
         >>> print(geodesic(newport_ri, cleveland_oh).miles)
         538.390445368
 
-
-    .. versionadded:: 1.13.0
     """
 
     ellipsoid_key = None

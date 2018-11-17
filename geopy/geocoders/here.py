@@ -24,8 +24,6 @@ class Here(Geocoder):
 
     Documentation at:
         https://developer.here.com/documentation/geocoder/
-
-    .. versionadded:: 1.15.0
     """
 
     structured_query_params = {
