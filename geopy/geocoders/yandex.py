@@ -70,7 +70,7 @@ class Yandex(Geocoder):
 
             .. versionadded:: 1.14.0
         """
-        super(Yandex, self).__init__(
+        super().__init__(
             format_string=format_string,
             scheme=scheme,
             timeout=timeout,

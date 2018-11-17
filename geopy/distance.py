@@ -298,7 +298,7 @@ class great_circle(Distance):
 
     def __init__(self, *args, **kwargs):
         self.RADIUS = kwargs.pop('radius', EARTH_RADIUS)
-        super(great_circle, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def measure(self, a, b):
         a, b = Point(a), Point(b)
@@ -386,7 +386,7 @@ class geodesic(Distance):
                           'distance.', DeprecationWarning, stacklevel=2)
         kwargs.pop('iterations', 0)
         major, minor, f = self.ELLIPSOID
-        super(geodesic, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def set_ellipsoid(self, ellipsoid):
         """
@@ -494,7 +494,7 @@ class vincenty(Distance):
         self.set_ellipsoid(kwargs.pop('ellipsoid', 'WGS-84'))
         self.iterations = kwargs.pop('iterations', 20)
         major, minor, f = self.ELLIPSOID
-        super(vincenty, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     def set_ellipsoid(self, ellipsoid):
         """

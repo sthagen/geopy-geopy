@@ -91,7 +91,7 @@ class PickPoint(Nominatim):
             .. versionadded:: 1.14.0
         """
 
-        super(PickPoint, self).__init__(
+        super().__init__(
             format_string=format_string,
             view_box=view_box,
             bounded=bounded,
@@ -117,4 +117,4 @@ class PickPoint(Nominatim):
         :return: string URL.
         """
         params['key'] = self.api_key
-        return super(PickPoint, self)._construct_url(base_api, params)
+        return super()._construct_url(base_api, params)
