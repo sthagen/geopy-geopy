@@ -44,6 +44,7 @@ class Here(Geocoder):
             self,
             app_id,
             app_code,
+            *,
             format_string=None,
             scheme=None,
             timeout=DEFAULT_SENTINEL,
@@ -96,6 +97,7 @@ class Here(Geocoder):
     def geocode(
             self,
             query,
+            *,
             bbox=None,
             mapview=None,
             exactly_one=True,
@@ -204,6 +206,7 @@ class Here(Geocoder):
     def reverse(
             self,
             query,
+            *,
             radius=None,
             exactly_one=True,
             maxresults=None,

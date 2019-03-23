@@ -21,6 +21,7 @@ class LiveAddress(Geocoder):
             self,
             auth_id,
             auth_token,
+            *,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
@@ -66,6 +67,7 @@ class LiveAddress(Geocoder):
     def geocode(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             candidates=1,

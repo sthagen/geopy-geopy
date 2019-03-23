@@ -20,6 +20,7 @@ class Yandex(Geocoder):
     def __init__(
             self,
             api_key=None,
+            *,
             lang=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
@@ -69,7 +70,7 @@ class Yandex(Geocoder):
         domain = 'geocode-maps.yandex.ru'
         self.api = '%s://%s%s' % (self.scheme, domain, self.api_path)
 
-    def geocode(self, query, exactly_one=True, timeout=DEFAULT_SENTINEL):
+    def geocode(self, query, *, exactly_one=True, timeout=DEFAULT_SENTINEL):
         """
         Return a location point by address.
 
@@ -106,6 +107,7 @@ class Yandex(Geocoder):
     def reverse(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             kind=None,

@@ -18,6 +18,7 @@ class AzureMaps(TomTom):
     def __init__(
             self,
             subscription_key,
+            *,
             format_string=None,
             scheme=None,
             timeout=DEFAULT_SENTINEL,

@@ -38,6 +38,7 @@ class GeoNames(Geocoder):
     def __init__(
             self,
             username=None,
+            *,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
@@ -108,6 +109,7 @@ class GeoNames(Geocoder):
     def geocode(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             country=None,
@@ -165,6 +167,7 @@ class GeoNames(Geocoder):
     def reverse(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             feature_code=None,
@@ -264,7 +267,7 @@ class GeoNames(Geocoder):
             params['lang'] = lang
         return params
 
-    def reverse_timezone(self, query, timeout=DEFAULT_SENTINEL):
+    def reverse_timezone(self, query, *, timeout=DEFAULT_SENTINEL):
         """
         Find the timezone for a point in `query`.
 

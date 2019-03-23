@@ -34,6 +34,7 @@ class Geolake(Geocoder):
     def __init__(
             self,
             api_key,
+            *,
             domain='api.geolake.com',
             scheme=None,
             timeout=DEFAULT_SENTINEL,
@@ -87,6 +88,7 @@ class Geolake(Geocoder):
     def geocode(
             self,
             query,
+            *,
             country_codes=None,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,

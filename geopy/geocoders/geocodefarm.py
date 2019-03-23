@@ -25,6 +25,7 @@ class GeocodeFarm(Geocoder):
     def __init__(
             self,
             api_key=None,
+            *,
             format_string=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
@@ -73,7 +74,7 @@ class GeocodeFarm(Geocoder):
             "%s://%s%s" % (self.scheme, domain, self.reverse_path)
         )
 
-    def geocode(self, query, exactly_one=True, timeout=DEFAULT_SENTINEL):
+    def geocode(self, query, *, exactly_one=True, timeout=DEFAULT_SENTINEL):
         """
         Return a location point by address.
 
@@ -101,7 +102,7 @@ class GeocodeFarm(Geocoder):
             self._call_geocoder(url, timeout=timeout), exactly_one
         )
 
-    def reverse(self, query, exactly_one=True, timeout=DEFAULT_SENTINEL):
+    def reverse(self, query, *, exactly_one=True, timeout=DEFAULT_SENTINEL):
         """
         Return an address by location point.
 

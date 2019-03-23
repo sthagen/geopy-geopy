@@ -19,6 +19,7 @@ class DataBC(Geocoder):
 
     def __init__(
             self,
+            *,
             scheme=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
@@ -61,6 +62,7 @@ class DataBC(Geocoder):
     def geocode(
             self,
             query,
+            *,
             max_results=25,
             set_back=0,
             location_descriptor='any',

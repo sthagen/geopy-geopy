@@ -18,6 +18,7 @@ class OpenMapQuest(Nominatim):
     def __init__(
             self,
             api_key=None,
+            *,
             format_string=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,

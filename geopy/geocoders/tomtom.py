@@ -20,6 +20,7 @@ class TomTom(Geocoder):
     def __init__(
             self,
             api_key,
+            *,
             format_string=None,
             scheme=None,
             timeout=DEFAULT_SENTINEL,
@@ -68,6 +69,7 @@ class TomTom(Geocoder):
     def geocode(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             limit=None,
@@ -127,6 +129,7 @@ class TomTom(Geocoder):
     def reverse(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             language=None,

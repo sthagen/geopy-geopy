@@ -43,6 +43,7 @@ class IGNFrance(Geocoder):
     def __init__(
             self,
             api_key,
+            *,
             username=None,
             password=None,
             referer=None,
@@ -132,6 +133,7 @@ class IGNFrance(Geocoder):
     def geocode(
             self,
             query,
+            *,
             query_type='StreetAddress',
             maximum_responses=25,
             is_freeform=False,
@@ -239,6 +241,7 @@ class IGNFrance(Geocoder):
     def reverse(
             self,
             query,
+            *,
             reverse_geocode_preference=('StreetAddress', ),
             maximum_responses=25,
             filtering='',

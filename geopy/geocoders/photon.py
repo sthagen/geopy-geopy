@@ -24,6 +24,7 @@ class Photon(Geocoder):
 
     def __init__(
             self,
+            *,
             format_string=None,
             scheme=None,
             timeout=DEFAULT_SENTINEL,
@@ -72,6 +73,7 @@ class Photon(Geocoder):
     def geocode(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             location_bias=None,
@@ -145,6 +147,7 @@ class Photon(Geocoder):
     def reverse(
             self,
             query,
+            *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             language=False,
