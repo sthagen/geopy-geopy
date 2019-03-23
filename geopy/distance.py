@@ -79,6 +79,7 @@ calculate the length of a path::
     3277.30439191
 
 """
+import abc
 from math import asin, atan2, cos, sin, sqrt
 
 from geographiclib.geodesic import Geodesic
@@ -139,7 +140,7 @@ def lonlat(x, y, z=0):
     return Point(y, x, z)
 
 
-class Distance:
+class Distance(abc.ABC):
 
     def __init__(self, *args, **kwargs):
         kilometers = kwargs.pop('kilometers', 0)
@@ -188,10 +189,8 @@ class Distance:
 
     __bool__ = __nonzero__
 
+    @abc.abstractmethod
     def measure(self, a, b):
-        """
-        Abstract method for measure
-        """
         raise NotImplementedError()
 
     def __repr__(self):  # pragma: no cover
