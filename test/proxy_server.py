@@ -68,6 +68,14 @@ class ProxyServerThread(threading.Thread):
         super().__init__()
         self.daemon = True
 
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
+        self.join()
+
     def get_proxy_url(self):
         assert self.socket_created_future.result(self.spinup_timeout)
         return "http://%s:%s" % (self.proxy_host, self.proxy_port)
@@ -86,6 +94,9 @@ class ProxyServerThread(threading.Thread):
 
                 req = urlopen(self.path, timeout=self.timeout)
                 self.send_response(req.getcode())
+                content_type = req.info().get('content-type', None)
+                if content_type:
+                    self.send_header('Content-Type', content_type)
                 self.send_header('Connection', 'close')
                 self.end_headers()
                 self.copyfile(req, self.wfile)

@@ -1,22 +1,15 @@
-import json
-from socket import timeout as SocketTimeout
-from ssl import SSLError
-from urllib.error import HTTPError
-from urllib.request import HTTPSHandler, ProxyHandler, Request, URLError, build_opener
-
+from geopy.adapters import AdapterHTTPError, URLLibAdapter
 from geopy.exc import (
     ConfigurationError,
     GeocoderAuthenticationFailure,
     GeocoderInsufficientPrivileges,
-    GeocoderParseError,
     GeocoderQueryError,
     GeocoderQuotaExceeded,
     GeocoderServiceError,
     GeocoderTimedOut,
-    GeocoderUnavailable,
 )
 from geopy.point import Point
-from geopy.util import __version__, decode_page, logger
+from geopy.util import __version__, logger
 
 __all__ = (
     "Geocoder",
@@ -24,6 +17,12 @@ __all__ = (
 )
 
 _DEFAULT_USER_AGENT = "geopy/%s" % __version__
+
+_DEFAULT_ADAPTER_CLASS = next(
+    adapter_cls
+    for adapter_cls in (URLLibAdapter,)
+    if adapter_cls.is_available
+)
 
 
 class options:
@@ -50,6 +49,15 @@ class options:
         7
 
     Attributes:
+        adapter_factory
+            A callable which returns a :class:`geopy.adapters.BaseAdapter`
+            instance. Adapters are different implementations of HTTP clients.
+            See :mod:`geopy.adapters` for more info.
+
+            Default adapter is :class:`geopy.adapters.URLLibAdapter`.
+
+            .. versionadded:: 2.0
+
         default_format_string
             String containing ``'%s'`` where the string to geocode should
             be interpolated before querying the geocoder. Used by `geocode`
@@ -144,6 +152,7 @@ class options:
     #
     # [1]: http://www.sphinx-doc.org/en/master/ext/autodoc.html#directive-autoattribute
     # [2]: https://github.com/rtfd/readthedocs.org/issues/855#issuecomment-261337038
+    adapter_factory = _DEFAULT_ADAPTER_CLASS
     default_format_string = '%s'
     default_proxies = None
     default_scheme = 'https'
@@ -209,18 +218,10 @@ class Geocoder:
         if isinstance(self.proxies, str):
             self.proxies = {'http': self.proxies, 'https': self.proxies}
 
-        # `ProxyHandler` should be present even when actually there're
-        # no proxies. `build_opener` contains it anyway. By specifying
-        # it here explicitly we can disable system proxies (i.e.
-        # from HTTP_PROXY env var) by setting `self.proxies` to `{}`.
-        # Otherwise, if we didn't specify ProxyHandler for empty
-        # `self.proxies` here, build_opener would have used one internally
-        # which could have unwillingly picked up the system proxies.
-        opener = build_opener(
-            HTTPSHandler(context=self.ssl_context),
-            ProxyHandler(self.proxies),
+        self.adapter = options.adapter_factory(
+            proxies=self.proxies,
+            ssl_context=self.ssl_context,
         )
-        self.urlopen = opener.open
 
     @staticmethod
     def _coerce_point_to_string(point, output_format="%(lat)s,%(lon)s"):
@@ -280,70 +281,28 @@ class Geocoder:
         req_headers = self.headers.copy()
         if headers:
             req_headers.update(headers)
-        req = Request(url=url, headers=req_headers)
 
         timeout = (timeout if timeout is not DEFAULT_SENTINEL
                    else self.timeout)
 
         try:
-            page = self.urlopen(req, timeout=timeout)
-        except Exception as error:
-            message = (
-                str(error.args[0])
-                if len(error.args)
-                else str(error)
-            )
-            self._geocoder_exception_handler(error, message)
-            if isinstance(error, HTTPError):
-                code = error.getcode()
-                body = self._read_http_error_body(error)
-                if body:
-                    logger.info('Received an HTTP error (%s): %s', code, body,
-                                exc_info=False)
-                try:
-                    raise ERROR_CODE_MAP[code](message)
-                except KeyError:
-                    raise GeocoderServiceError(message)
-            elif isinstance(error, URLError):
-                if "timed out" in message:
-                    raise GeocoderTimedOut('Service timed out')
-                elif "unreachable" in message:
-                    raise GeocoderUnavailable('Service not available')
-            elif isinstance(error, SocketTimeout):
-                raise GeocoderTimedOut('Service timed out')
-            elif isinstance(error, SSLError):
-                if "timed out" in message:
-                    raise GeocoderTimedOut('Service timed out')
-            raise GeocoderServiceError(message)
-
-        if hasattr(page, 'getcode'):
-            status_code = page.getcode()
-        elif hasattr(page, 'status_code'):
-            status_code = page.status_code
-        else:
-            status_code = None
-        if status_code in ERROR_CODE_MAP:
-            raise ERROR_CODE_MAP[page.status_code]("\n%s" % decode_page(page))
-
-        page = decode_page(page)
-
-        if is_json:
-            try:
-                return json.loads(page)
-            except ValueError:
-                raise GeocoderParseError(
-                    "Could not deserialize using deserializer:\n%s" % page
+            if is_json:
+                return self.adapter.get_json(url, timeout=timeout, headers=req_headers)
+            else:
+                return self.adapter.get_text(url, timeout=timeout, headers=req_headers)
+        except AdapterHTTPError as error:
+            message = str(error)
+            if error.text:
+                logger.info(
+                    'Received an HTTP error (%s): %s',
+                    error.status_code,
+                    error.text,
+                    exc_info=False,
                 )
-        else:
-            return page
-
-    def _read_http_error_body(self, error):
-        try:
-            return decode_page(error)
-        except Exception:
-            logger.debug('Unable to fetch body for a non-successful HTTP response',
-                         exc_info=True)
-            return None
+            try:
+                raise ERROR_CODE_MAP[error.status_code](message)
+            except KeyError:
+                raise GeocoderServiceError(message)
 
     # def geocode(self, query, *, exactly_one=True, timeout=DEFAULT_SENTINEL):
     #     raise NotImplementedError()

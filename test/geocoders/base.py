@@ -1,5 +1,4 @@
 import unittest
-import urllib.request
 from contextlib import ExitStack
 from unittest.mock import patch, sentinel
 
@@ -96,45 +95,30 @@ class GeocoderTestCase(unittest.TestCase):
         self.assertEqual(g.timeout, 12)
 
         with ExitStack() as stack:
-            mock_urlopen = stack.enter_context(patch.object(g, 'urlopen'))
-            stack.enter_context(
-                patch.object(geopy.geocoders.base, 'decode_page', return_value='{}')
-            )
+            mock_get_json = stack.enter_context(patch.object(g.adapter, 'get_json'))
 
             g._call_geocoder(url)
-            args, kwargs = mock_urlopen.call_args
+            args, kwargs = mock_get_json.call_args
             self.assertEqual(kwargs['timeout'], 12)
 
             g._call_geocoder(url, timeout=7)
-            args, kwargs = mock_urlopen.call_args
+            args, kwargs = mock_get_json.call_args
             self.assertEqual(kwargs['timeout'], 7)
 
             g._call_geocoder(url, timeout=None)
-            args, kwargs = mock_urlopen.call_args
+            args, kwargs = mock_get_json.call_args
             self.assertIsNone(kwargs['timeout'])
 
     def test_ssl_context(self):
-
-        class HTTPSHandlerStub(urllib.request.HTTPSHandler):
-            def __init__(self, context=None):
-                super().__init__()
-
         with ExitStack() as stack:
-            stack.enter_context(
-                patch.object(geopy.geocoders.base, 'HTTPSHandler', HTTPSHandlerStub)
-            )
-            mock_https_handler_init = stack.enter_context(
-                patch.object(
-                    HTTPSHandlerStub, '__init__', autospec=True,
-                    side_effect=HTTPSHandlerStub.__init__
-                )
+            mock_adapter = stack.enter_context(
+                patch.object(geopy.geocoders.base.options, 'adapter_factory')
             )
 
             for ssl_context in (None, sentinel.some_ssl_context):
-                mock_https_handler_init.reset_mock()
                 Geocoder(ssl_context=ssl_context)
-                args, kwargs = mock_https_handler_init.call_args
-                self.assertIs(kwargs['context'], ssl_context)
+                args, kwargs = mock_adapter.call_args
+                self.assertIs(kwargs['ssl_context'], ssl_context)
 
 
 class GeocoderPointCoercionTestCase(unittest.TestCase):
