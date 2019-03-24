@@ -3,7 +3,6 @@ from urllib.parse import urlencode
 from urllib.request import (
     HTTPBasicAuthHandler,
     HTTPPasswordMgrWithDefaultRealm,
-    Request,
     build_opener,
 )
 
@@ -509,14 +508,13 @@ class IGNFrance(Geocoder):
         """
         Send the request to get raw content.
         """
-
-        request = Request(url)
-
+        headers = {}
         if self.referer is not None:
-            request.add_header('Referer', self.referer)
+            headers['Referer'] = self.referer
 
         raw_xml = self._call_geocoder(
-            request,
+            url,
+            headers=headers,
             timeout=timeout,
             deserializer=None
         )
