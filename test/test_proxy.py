@@ -4,8 +4,10 @@ Test ability to proxy requests.
 import os
 import ssl
 import unittest
+from unittest.mock import patch
 from urllib.request import getproxies, urlopen
 
+import geopy.geocoders.base
 from geopy.exc import GeocoderServiceError
 from geopy.geocoders.base import Geocoder
 from test.proxy_server import ProxyServerThread
@@ -21,7 +23,8 @@ WITH_SYSTEM_PROXIES = bool(getproxies())
 
 class DummyGeocoder(Geocoder):
     def geocode(self, location):
-        geo_request = self._call_geocoder(location, raw=True)
+        with patch.object(geopy.geocoders.base, 'decode_page', lambda page: page):
+            geo_request = self._call_geocoder(location, deserializer=None)
         geo_html = geo_request.read()
         return geo_html if geo_html else None
 
