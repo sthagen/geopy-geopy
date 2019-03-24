@@ -26,7 +26,7 @@ class LiveAddress(Geocoder):
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
             format_string=None,
-            ssl_context=DEFAULT_SENTINEL,
+            ssl_context=DEFAULT_SENTINEL
     ):
         """
 
@@ -70,7 +70,7 @@ class LiveAddress(Geocoder):
             *,
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
-            candidates=1,
+            candidates=1
     ):
         """
         Return a location point by address.

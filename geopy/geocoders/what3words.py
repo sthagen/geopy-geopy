@@ -31,7 +31,7 @@ class What3Words(Geocoder):
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
-            ssl_context=DEFAULT_SENTINEL,
+            ssl_context=DEFAULT_SENTINEL
     ):
         """
 
@@ -83,7 +83,7 @@ class What3Words(Geocoder):
             *,
             lang='en',
             exactly_one=True,
-            timeout=DEFAULT_SENTINEL,
+            timeout=DEFAULT_SENTINEL
     ):
 
         """
@@ -173,7 +173,7 @@ class What3Words(Geocoder):
             *,
             lang='en',
             exactly_one=True,
-            timeout=DEFAULT_SENTINEL,
+            timeout=DEFAULT_SENTINEL
     ):
         """
         Return a `3 words` address by location point. Each point on surface has

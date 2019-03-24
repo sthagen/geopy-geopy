@@ -41,7 +41,7 @@ class Geolake(Geocoder):
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
             format_string=None,
-            ssl_context=DEFAULT_SENTINEL,
+            ssl_context=DEFAULT_SENTINEL
     ):
         """
 
@@ -91,7 +91,7 @@ class Geolake(Geocoder):
             *,
             country_codes=None,
             exactly_one=True,
-            timeout=DEFAULT_SENTINEL,
+            timeout=DEFAULT_SENTINEL
     ):
         """
         Return a location point by address.

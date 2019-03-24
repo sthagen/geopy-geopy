@@ -30,7 +30,7 @@ class Pelias(Geocoder):
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
             scheme=None,
-            ssl_context=DEFAULT_SENTINEL,
+            ssl_context=DEFAULT_SENTINEL
             # Make sure to synchronize the changes of this signature in the
             # inheriting classes (e.g. GeocodeEarth).
     ):
@@ -85,7 +85,7 @@ class Pelias(Geocoder):
             exactly_one=True,
             timeout=DEFAULT_SENTINEL,
             boundary_rect=None,
-            country_bias=None,
+            country_bias=None
     ):
         """
         Return a location point by address.
@@ -140,7 +140,7 @@ class Pelias(Geocoder):
             query,
             *,
             exactly_one=True,
-            timeout=DEFAULT_SENTINEL,
+            timeout=DEFAULT_SENTINEL
     ):
         """
         Return an address by location point.
