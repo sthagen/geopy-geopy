@@ -9,7 +9,7 @@ from unittest.mock import patch
 from urllib.request import getproxies, urlopen
 
 import geopy.geocoders
-from geopy.adapters import URLLibAdapter
+from geopy.adapters import RequestsAdapter, URLLibAdapter
 from geopy.exc import GeocoderServiceError
 from geopy.geocoders.base import Geocoder
 from test.proxy_server import ProxyServerThread
@@ -235,3 +235,19 @@ class URLLibAdapterNoProxiesTestCase(BaseNoProxiesTestCase, unittest.TestCase):
 
 class URLLibAdapterJsonTestCase(BaseJsonTestCase, unittest.TestCase):
     adapter_factory = URLLibAdapter
+
+
+class RequestsAdapterProxyTestCase(BaseProxyTestCase, unittest.TestCase):
+    adapter_factory = RequestsAdapter
+
+
+class RequestsAdapterSystemProxiesTestCase(BaseSystemProxiesTestCase, unittest.TestCase):
+    adapter_factory = RequestsAdapter
+
+
+class RequestsAdapterNoProxiesTestCase(BaseNoProxiesTestCase, unittest.TestCase):
+    adapter_factory = RequestsAdapter
+
+
+class RequestsAdapterJsonTestCase(BaseJsonTestCase, unittest.TestCase):
+    adapter_factory = RequestsAdapter

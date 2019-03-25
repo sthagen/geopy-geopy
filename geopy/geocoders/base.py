@@ -1,4 +1,4 @@
-from geopy.adapters import AdapterHTTPError, URLLibAdapter
+from geopy.adapters import AdapterHTTPError, RequestsAdapter, URLLibAdapter
 from geopy.exc import (
     ConfigurationError,
     GeocoderAuthenticationFailure,
@@ -20,7 +20,7 @@ _DEFAULT_USER_AGENT = "geopy/%s" % __version__
 
 _DEFAULT_ADAPTER_CLASS = next(
     adapter_cls
-    for adapter_cls in (URLLibAdapter,)
+    for adapter_cls in (RequestsAdapter, URLLibAdapter,)
     if adapter_cls.is_available
 )
 
@@ -54,7 +54,9 @@ class options:
             instance. Adapters are different implementations of HTTP clients.
             See :mod:`geopy.adapters` for more info.
 
-            Default adapter is :class:`geopy.adapters.URLLibAdapter`.
+            If ``requests`` package is installed, the default adapter
+            is :class:`geopy.adapters.RequestsAdapter`. Otherwise it is
+            :class:`geopy.adapters.URLLibAdapter`.
 
             .. versionadded:: 2.0
 

@@ -368,6 +368,9 @@ Adapters
 
     .. automethod:: __init__
 
+.. autoclass:: geopy.adapters.RequestsAdapter
+    :show-inheritance:
+
 .. autoclass:: geopy.adapters.URLLibAdapter
     :show-inheritance:
 
