@@ -64,7 +64,7 @@ setup(
         "dev-test": (EXTRAS_DEV_TESTFILES_COMMON +
                      EXTRAS_DEV_TEST),
         "dev-docs": EXTRAS_DEV_DOCS,
-        "requests": ["requests"],
+        "requests": ["urllib3>=1.24.2", "requests"],
         "timezone": ["pytz"],
     },
     license='MIT',
