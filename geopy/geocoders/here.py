@@ -1,19 +1,24 @@
+import collections.abc
+import json
 import warnings
+from functools import partial
+from urllib.parse import urlencode
 
-from geopy.compat import urlencode
+from geopy.adapters import AdapterHTTPError
 from geopy.exc import (
     ConfigurationError,
     GeocoderAuthenticationFailure,
     GeocoderInsufficientPrivileges,
-    GeocoderQuotaExceeded,
+    GeocoderQueryError,
+    GeocoderRateLimited,
     GeocoderServiceError,
     GeocoderUnavailable,
 )
-from geopy.geocoders.base import DEFAULT_SENTINEL, Geocoder
+from geopy.geocoders.base import DEFAULT_SENTINEL, ERROR_CODE_MAP, Geocoder
 from geopy.location import Location
 from geopy.util import join_filter, logger
 
-__all__ = ("Here", )
+__all__ = ("Here", "HereV7")
 
 
 class Here(Geocoder):
@@ -22,7 +27,9 @@ class Here(Geocoder):
     Documentation at:
         https://developer.here.com/documentation/geocoder/
 
-    .. versionadded:: 1.15.0
+    .. attention::
+        This class uses a v6 API which is in maintenance mode.
+        Consider using the newer :class:`.HereV7` class.
     """
 
     structured_query_params = {
@@ -41,15 +48,16 @@ class Here(Geocoder):
 
     def __init__(
             self,
+            *,
             app_id=None,
             app_code=None,
             apikey=None,
-            format_string=None,
             scheme=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
             ssl_context=DEFAULT_SENTINEL,
+            adapter_factory=None
     ):
         """
 
@@ -57,7 +65,7 @@ class Here(Geocoder):
             be replaced with APIKEY.
             See https://developer.here.com/authenticationpage.
 
-            .. deprecated:: 1.21.0
+            .. attention::
                 App ID and App Code are being replaced by API Keys and OAuth 2.0
                 by HERE. Consider getting an ``apikey`` instead of using
                 ``app_id`` and ``app_code``.
@@ -66,7 +74,10 @@ class Here(Geocoder):
             eventually be replaced with APIKEY.
             See https://developer.here.com/authenticationpage.
 
-            .. deprecated:: 1.21.0
+            .. attention::
+                App ID and App Code are being replaced by API Keys and OAuth 2.0
+                by HERE. Consider getting an ``apikey`` instead of using
+                ``app_id`` and ``app_code``.
 
         :param str apikey: Should be a valid HERE Maps APIKEY. These keys were
             introduced in December 2019 and will eventually replace the legacy
@@ -75,11 +86,6 @@ class Here(Geocoder):
             More authentication details are available at
             https://developer.here.com/blog/announcing-two-new-authentication-types.
             See https://developer.here.com/authenticationpage.
-
-            .. versionadded:: 1.21.0
-
-        :param str format_string:
-            See :attr:`geopy.geocoders.options.default_format_string`.
 
         :param str scheme:
             See :attr:`geopy.geocoders.options.default_scheme`.
@@ -96,14 +102,19 @@ class Here(Geocoder):
         :type ssl_context: :class:`ssl.SSLContext`
         :param ssl_context:
             See :attr:`geopy.geocoders.options.default_ssl_context`.
+
+        :param callable adapter_factory:
+            See :attr:`geopy.geocoders.options.default_adapter_factory`.
+
+            .. versionadded:: 2.0
         """
-        super(Here, self).__init__(
-            format_string=format_string,
+        super().__init__(
             scheme=scheme,
             timeout=timeout,
             proxies=proxies,
             user_agent=user_agent,
             ssl_context=ssl_context,
+            adapter_factory=adapter_factory,
         )
         is_apikey = bool(apikey)
         is_app_code = app_id and app_code
@@ -135,6 +146,7 @@ class Here(Geocoder):
     def geocode(
             self,
             query,
+            *,
             bbox=None,
             mapview=None,
             exactly_one=True,
@@ -151,11 +163,12 @@ class Here(Geocoder):
         A list of all parameters of the pure REST API is available here:
         https://developer.here.com/documentation/geocoder/topics/resource-geocode.html
 
-        :param str query: The address or query you wish to geocode.
+        :param query: The address or query you wish to geocode.
 
             For a structured query, provide a dictionary whose keys
             are one of: `city`, `county`, `district`, `country`, `state`,
             `street`, `housenumber`, or `postalcode`.
+        :type query: str or dict
 
         :param bbox: A type of spatial filter, limits the search for any other attributes
             in the request. Specified by two coordinate (lat/lon)
@@ -201,7 +214,7 @@ class Here(Geocoder):
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
-        if isinstance(query, dict):
+        if isinstance(query, collections.abc.Mapping):
             params = {
                 key: val
                 for key, val
@@ -209,7 +222,7 @@ class Here(Geocoder):
                 if key in self.structured_query_params
             }
         else:
-            params = {'searchtext': self.format_string % query}
+            params = {'searchtext': query}
         if bbox:
             params['bbox'] = self._format_bounding_box(
                 bbox, "%(lat2)s,%(lon1)s;%(lat1)s,%(lon2)s")
@@ -234,14 +247,13 @@ class Here(Geocoder):
 
         url = "?".join((self.api, urlencode(params)))
         logger.debug("%s.geocode: %s", self.__class__.__name__, url)
-        return self._parse_json(
-            self._call_geocoder(url, timeout=timeout),
-            exactly_one
-        )
+        callback = partial(self._parse_json, exactly_one=exactly_one)
+        return self._call_geocoder(url, callback, timeout=timeout)
 
     def reverse(
             self,
             query,
+            *,
             radius=None,
             exactly_one=True,
             maxresults=None,
@@ -314,13 +326,10 @@ class Here(Geocoder):
             params['app_code'] = self.app_code
         url = "%s?%s" % (self.reverse_api, urlencode(params))
         logger.debug("%s.reverse: %s", self.__class__.__name__, url)
-        return self._parse_json(
-            self._call_geocoder(url, timeout=timeout),
-            exactly_one
-        )
+        callback = partial(self._parse_json, exactly_one=exactly_one)
+        return self._call_geocoder(url, callback, timeout=timeout)
 
-    @staticmethod
-    def _parse_json(doc, exactly_one=True):
+    def _parse_json(self, doc, exactly_one=True):
         """
         Parse a location name, latitude, and longitude from an JSON response.
         """
@@ -332,7 +341,7 @@ class Here(Geocoder):
             elif status_code == 403:
                 raise GeocoderInsufficientPrivileges(err)
             elif status_code == 429:
-                raise GeocoderQuotaExceeded(err)
+                raise GeocoderRateLimited(err)
             elif status_code == 503:
                 raise GeocoderUnavailable(err)
             else:
@@ -372,3 +381,269 @@ class Here(Geocoder):
             return parse_resource(resources[0])
         else:
             return [parse_resource(resource) for resource in resources]
+
+
+class HereV7(Geocoder):
+    """Geocoder using the HERE Geocoding & Search v7 API.
+
+    Documentation at:
+        https://developer.here.com/documentation/geocoding-search-api/
+
+    Terms of Service at:
+        https://legal.here.com/en-gb/terms
+
+    .. versionadded:: 2.2
+    """
+
+    structured_query_params = {
+        'country',
+        'state',
+        'county',
+        'city',
+        'district',
+        'street',
+        'houseNumber',
+        'postalCode',
+    }
+
+    geocode_path = '/v1/geocode'
+    reverse_path = '/v1/revgeocode'
+
+    def __init__(
+            self,
+            apikey,
+            *,
+            scheme=None,
+            timeout=DEFAULT_SENTINEL,
+            proxies=DEFAULT_SENTINEL,
+            user_agent=None,
+            ssl_context=DEFAULT_SENTINEL,
+            adapter_factory=None
+    ):
+        """
+
+        :param str apikey: Should be a valid HERE Maps apikey.
+            A project can be created at
+            https://developer.here.com/projects.
+
+        :param str scheme:
+            See :attr:`geopy.geocoders.options.default_scheme`.
+
+        :param int timeout:
+            See :attr:`geopy.geocoders.options.default_timeout`.
+
+        :param dict proxies:
+            See :attr:`geopy.geocoders.options.default_proxies`.
+
+        :param str user_agent:
+            See :attr:`geopy.geocoders.options.default_user_agent`.
+
+        :type ssl_context: :class:`ssl.SSLContext`
+        :param ssl_context:
+            See :attr:`geopy.geocoders.options.default_ssl_context`.
+
+        :param callable adapter_factory:
+            See :attr:`geopy.geocoders.options.default_adapter_factory`.
+        """
+        super().__init__(
+            scheme=scheme,
+            timeout=timeout,
+            proxies=proxies,
+            user_agent=user_agent,
+            ssl_context=ssl_context,
+            adapter_factory=adapter_factory,
+        )
+
+        domain = "search.hereapi.com"
+
+        self.apikey = apikey
+        self.api = "%s://geocode.%s%s" % (self.scheme, domain, self.geocode_path)
+        self.reverse_api = (
+            "%s://revgeocode.%s%s" % (self.scheme, domain, self.reverse_path)
+        )
+
+    def geocode(
+        self,
+        query=None,
+        *,
+        components=None,
+        at=None,
+        countries=None,
+        language=None,
+        limit=None,
+        exactly_one=True,
+        timeout=DEFAULT_SENTINEL
+    ):
+        """
+        Return a location point by address.
+
+        :param str query: The address or query you wish to geocode. Optional,
+            if ``components`` param is set.
+
+        :param dict components: A structured query. Can be used along with
+            the free-text ``query``. Should be a dictionary whose keys
+            are one of:
+            `country`, `state`, `county`, `city`, `district`, `street`,
+            `houseNumber`, `postalCode`.
+
+        :param at: The center of the search context.
+        :type at: :class:`geopy.point.Point`, list or tuple of ``(latitude,
+            longitude)``, or string as ``"%(latitude)s, %(longitude)s"``.
+
+        :param list countries: A list of country codes specified in
+            `ISO 3166-1 alpha-3 <https://en.wikipedia.org/wiki/ISO_3166-1_alpha-3>`_
+            format, e.g. ``['USA', 'CAN']``.
+            This is a hard filter.
+
+        :param str language: Affects the language of the response,
+            must be a BCP 47 compliant language code, e.g. ``en-US``.
+
+        :param int limit: Defines the maximum number of items in the
+            response structure. If not provided and there are multiple results
+            the HERE API will return 20 results by default. This will be reset
+            to one if ``exactly_one`` is True.
+
+        :param bool exactly_one: Return one result or a list of results, if
+            available.
+
+        :param int timeout: Time, in seconds, to wait for the geocoding service
+            to respond before raising a :class:`geopy.exc.GeocoderTimedOut`
+            exception. Set this only if you wish to override, on this call
+            only, the value set during the geocoder's initialization.
+
+        :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
+            ``exactly_one=False``.
+        """
+        params = {
+            'apiKey': self.apikey,
+        }
+
+        if query:
+            params['q'] = query
+
+        if components:
+            parts = [
+                "{}={}".format(key, val)
+                for key, val
+                in components.items()
+                if key in self.structured_query_params
+            ]
+            if not parts:
+                raise GeocoderQueryError("`components` dict must not be empty")
+            for pair in parts:
+                if ';' in pair:
+                    raise GeocoderQueryError(
+                        "';' must not be used in values of the structured query. "
+                        "Offending pair: {!r}".format(pair)
+                    )
+            params['qq'] = ';'.join(parts)
+
+        if at:
+            point = self._coerce_point_to_string(at, output_format="%(lat)s,%(lon)s")
+            params['at'] = point
+
+        if countries:
+            params['in'] = 'countryCode:' + ','.join(countries)
+
+        if language:
+            params['lang'] = language
+
+        if limit:
+            params['limit'] = limit
+        if exactly_one:
+            params['limit'] = 1
+
+        url = "?".join((self.api, urlencode(params)))
+        logger.debug("%s.geocode: %s", self.__class__.__name__, url)
+        callback = partial(self._parse_json, exactly_one=exactly_one)
+        return self._call_geocoder(url, callback, timeout=timeout)
+
+    def reverse(
+            self,
+            query,
+            *,
+            language=None,
+            limit=None,
+            exactly_one=True,
+            timeout=DEFAULT_SENTINEL
+    ):
+        """
+        Return an address by location point.
+
+        :param query: The coordinates for which you wish to obtain the
+            closest human-readable addresses.
+        :type query: :class:`geopy.point.Point`, list or tuple of ``(latitude,
+            longitude)``, or string as ``"%(latitude)s, %(longitude)s"``.
+
+        :param str language: Affects the language of the response,
+            must be a BCP 47 compliant language code, e.g. ``en-US``.
+
+        :param int limit: Maximum number of results to be returned.
+            This will be reset to one if ``exactly_one`` is True.
+
+        :param bool exactly_one: Return one result or a list of results, if
+            available.
+
+        :param int timeout: Time, in seconds, to wait for the geocoding service
+            to respond before raising a :class:`geopy.exc.GeocoderTimedOut`
+            exception. Set this only if you wish to override, on this call
+            only, the value set during the geocoder's initialization.
+
+        :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
+            ``exactly_one=False``.
+        """
+
+        params = {
+            'at': self._coerce_point_to_string(query, output_format="%(lat)s,%(lon)s"),
+            'apiKey': self.apikey,
+        }
+
+        if language:
+            params['lang'] = language
+
+        if limit:
+            params['limit'] = limit
+        if exactly_one:
+            params['limit'] = 1
+
+        url = "%s?%s" % (self.reverse_api, urlencode(params))
+        logger.debug("%s.reverse: %s", self.__class__.__name__, url)
+        callback = partial(self._parse_json, exactly_one=exactly_one)
+        return self._call_geocoder(url, callback, timeout=timeout)
+
+    def _parse_json(self, doc, exactly_one=True):
+        resources = doc['items']
+        if not resources:
+            return None
+
+        def parse_resource(resource):
+            """
+            Parse each return object.
+            """
+            location = resource['title']
+            position = resource['position']
+
+            latitude, longitude = position['lat'], position['lng']
+
+            return Location(location, (latitude, longitude), resource)
+
+        if exactly_one:
+            return parse_resource(resources[0])
+        else:
+            return [parse_resource(resource) for resource in resources]
+
+    def _geocoder_exception_handler(self, error):
+        if not isinstance(error, AdapterHTTPError):
+            return
+        if error.status_code is None or error.text is None:
+            return
+        try:
+            body = json.loads(error.text)
+        except ValueError:
+            message = error.text
+        else:
+            # `title`: https://developer.here.com/documentation/geocoding-search-api/api-reference-swagger.html  # noqa
+            # `error_description`: returned for queries without apiKey.
+            message = body.get('title') or body.get('error_description') or error.text
+        exc_cls = ERROR_CODE_MAP.get(error.status_code, GeocoderServiceError)
+        raise exc_cls(message) from error

@@ -5,8 +5,8 @@ geopy
     :target: https://pypi.python.org/pypi/geopy/
     :alt: Latest Version
 
-.. image:: https://img.shields.io/travis/geopy/geopy.svg?style=flat-square
-    :target: https://travis-ci.org/geopy/geopy
+.. image:: https://img.shields.io/github/workflow/status/geopy/geopy/CI?style=flat-square
+    :target: https://github.com/geopy/geopy/actions
     :alt: Build Status
 
 .. image:: https://img.shields.io/github/license/geopy/geopy.svg?style=flat-square
@@ -14,7 +14,7 @@ geopy
     :alt: License
 
 
-geopy is a Python 2 and 3 client for several popular geocoding web
+geopy is a Python client for several popular geocoding web
 services.
 
 geopy makes it easy for Python developers to locate the coordinates of
@@ -26,13 +26,13 @@ geopy includes geocoder classes for the `OpenStreetMap Nominatim`_,
 The full list is available on the `Geocoders doc section`_.
 Geocoder classes are located in `geopy.geocoders`_.
 
-.. _OpenStreetMap Nominatim: https://wiki.openstreetmap.org/wiki/Nominatim
+.. _OpenStreetMap Nominatim: https://nominatim.org
 .. _Google Geocoding API (V3): https://developers.google.com/maps/documentation/geocoding/
 .. _Geocoders doc section: https://geopy.readthedocs.io/en/latest/#geocoders
 .. _geopy.geocoders: https://github.com/geopy/geopy/tree/master/geopy/geocoders
 
-geopy is tested against CPython (versions 2.7, 3.4, 3.5, 3.6, 3.7, 3.8),
-PyPy, and PyPy3. geopy does not and will not support CPython 2.6.
+geopy is tested against CPython (versions 3.5, 3.6, 3.7, 3.8, 3.9)
+and PyPy3. geopy 1.x line also supported CPython 2.7, 3.4 and PyPy2.
 
 © geopy contributors 2006-2018 (see AUTHORS) under the `MIT
 License <https://github.com/geopy/geopy/blob/master/LICENSE>`__.
@@ -91,7 +91,8 @@ Geopy can calculate geodesic distance between two points using the
 with a default of the geodesic distance available as the function
 `geopy.distance.distance`.
 
-Here's an example usage of the geodesic distance:
+Here's an example usage of the geodesic distance, taking pair
+of :code:`(lat, lon)` tuples:
 
 .. code:: pycon
 
@@ -101,7 +102,7 @@ Here's an example usage of the geodesic distance:
     >>> print(geodesic(newport_ri, cleveland_oh).miles)
     538.390445368
 
-Using great-circle distance:
+Using great-circle distance, also taking pair of :code:`(lat, lon)` tuples:
 
 .. code:: pycon
 
