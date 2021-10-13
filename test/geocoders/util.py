@@ -97,8 +97,7 @@ class BaseTestGeocoder(ABC):
         self, payload, expected,
         *,
         skiptest_on_errors=True,
-        expect_failure=False,
-        skiptest_on_failure=False
+        expect_failure=False
     ):
         """
         Calls geocoder.geocode(**payload), then checks against `expected`.
@@ -113,10 +112,7 @@ class BaseTestGeocoder(ABC):
             assert result is None
             return
         if result is None:
-            if skiptest_on_failure:
-                pytest.skip('%s: Skipping test due to empty result' % cls.__name__)
-            else:
-                pytest.fail('%s: No result found' % cls.__name__)
+            pytest.fail('%s: No result found' % cls.__name__)
         if result == []:
             pytest.fail('%s returned an empty list instead of None' % cls.__name__)
         self._verify_request(result, exactly_one=payload.get('exactly_one', True),
@@ -127,8 +123,7 @@ class BaseTestGeocoder(ABC):
         self, payload, expected,
         *,
         skiptest_on_errors=True,
-        expect_failure=False,
-        skiptest_on_failure=False
+        expect_failure=False
     ):
         """
         Calls geocoder.reverse(**payload), then checks against `expected`.
@@ -143,10 +138,7 @@ class BaseTestGeocoder(ABC):
             assert result is None
             return
         if result is None:
-            if skiptest_on_failure:
-                pytest.skip('%s: Skipping test due to empty result' % cls.__name__)
-            else:
-                pytest.fail('%s: No result found' % cls.__name__)
+            pytest.fail('%s: No result found' % cls.__name__)
         if result == []:
             pytest.fail('%s returned an empty list instead of None' % cls.__name__)
         self._verify_request(result, exactly_one=payload.get('exactly_one', True),

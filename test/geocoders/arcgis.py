@@ -40,12 +40,6 @@ class TestArcGIS(BaseTestGeocoder):
             {"latitude": 41.890, "longitude": -87.624},
         )
 
-    async def test_unicode_name(self):
-        await self.geocode_run(
-            {"query": "\u6545\u5bab"},
-            {"latitude": 39.916, "longitude": 116.390},
-        )
-
     async def test_empty_response(self):
         await self.geocode_run(
             {"query": "dksahdksahdjksahdoufydshf"},
@@ -84,12 +78,10 @@ class TestArcGIS(BaseTestGeocoder):
             {"latitude": 40.75376406311989, "longitude": -73.98489005863667},
         )
 
-    async def test_reverse_no_result(self):
+    async def test_reverse_long_label_address(self):
         await self.reverse_run(
-            # Antarctica
-            {"query": (-84.172382, 45.9873073)},
-            {},
-            expect_failure=True
+            {"query": (35.173809, -37.485351)},
+            {"address": "Atlantic Ocean"},
         )
 
 
