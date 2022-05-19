@@ -2,7 +2,6 @@ import asyncio
 import atexit
 import contextlib
 import importlib
-import inspect
 import os
 import types
 from collections import defaultdict
@@ -18,35 +17,6 @@ import pytest
 import geopy.geocoders
 from geopy.adapters import AdapterHTTPError, BaseAsyncAdapter, BaseSyncAdapter
 from geopy.geocoders.base import _DEFAULT_ADAPTER_CLASS
-
-# pytest-aiohttp calls `inspect.isasyncgenfunction` to detect
-# async generators in fixtures.
-# To support Python 3.5 we use `async_generator` library.
-# However:
-# - Since Python 3.6 there is a native implementation of
-#   `inspect.isasyncgenfunction`, but it returns False
-#   for `async_generator`'s functions.
-# - The stock `async_generator.isasyncgenfunction` doesn't detect
-#   generators wrapped in `@pytest.fixture`.
-#
-# Thus we resort to monkey-patching it (for now).
-if getattr(inspect, "isasyncgenfunction", None) is not None:
-    # >=py36
-    original_isasyncgenfunction = inspect.isasyncgenfunction
-else:
-    # ==py35
-    original_isasyncgenfunction = lambda func: False  # noqa
-
-
-def isasyncgenfunction(obj):
-    if original_isasyncgenfunction(obj):
-        return True
-    # Detect async_generator function, possibly wrapped in `@pytest.fixture`:
-    # See https://github.com/python-trio/async_generator/blob/v1.10/async_generator/_impl.py#L451-L455  # noqa
-    return bool(getattr(obj, "_async_gen_function", None))
-
-
-inspect.isasyncgenfunction = isasyncgenfunction
 
 
 def load_adapter_cls(adapter_ref):
@@ -109,7 +79,7 @@ def skip_if_internet_access_is_not_allowed(is_internet_access_allowed):
 
 
 @pytest.fixture(autouse=True, scope="session")
-def loop():
+def event_loop():
     # Geocoder instances have class scope, so the event loop
     # should have session scope.
     loop = asyncio.new_event_loop()
