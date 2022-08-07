@@ -144,6 +144,8 @@ class CommonMathematicalOperatorCases:
     def test_should_not_allow_adding_with_objects_that_arent_distances(self):
         with self.assertRaises(TypeError):
             self.cls(1.0) + 5
+        with self.assertRaises(TypeError):
+            5 + self.cls(1.0)
 
     def test_should_be_able_to_negate_distances(self):
         distance = self.cls(1.0)
@@ -155,14 +157,26 @@ class CommonMathematicalOperatorCases:
         self.assertAlmostEqual(subtracted.kilometers, 1)
 
     def test_should_be_able_to_multiply_distances_by_floats(self):
-        self.assertAlmostEqual((self.cls(2.0) * 2.0).kilometers, 4.0)
+        self.assertAlmostEqual((self.cls(2.0) * 2.5).kilometers, 5.0)
+        self.assertAlmostEqual((2.5 * self.cls(2.0)).kilometers, 5.0)
 
     def test_should_not_be_able_to_multiply_distances_by_distances(self):
         with self.assertRaises(TypeError):
             self.cls(1.0) * self.cls(2.0)
 
+    def test_should_not_be_able_to_divide_floats_by_distances(self):
+        with self.assertRaises(TypeError):
+            1 / self.cls(2.0)
+        with self.assertRaises(TypeError):
+            1 // self.cls(2.0)
+
     def test_should_be_able_to_divide_distances_by_distances(self):
         ratio = self.cls(4.0) / self.cls(2.0)
+        self.assertIsInstance(ratio, float)
+        self.assertAlmostEqual(ratio, 2.0)
+
+    def test_should_be_able_to_floor_divide_distances_by_distances(self):
+        ratio = self.cls(4.0) // self.cls(2.0)
         self.assertIsInstance(ratio, float)
         self.assertAlmostEqual(ratio, 2.0)
 
@@ -170,6 +184,11 @@ class CommonMathematicalOperatorCases:
         divided_distance = self.cls(4.0) / 2.0
         self.assertIsInstance(divided_distance, self.cls)
         self.assertAlmostEqual(divided_distance.kilometers, 2.0)
+
+    def test_should_be_able_to_floor_divide_distances(self):
+        divided_distance = self.cls(4.0) // 3
+        self.assertIsInstance(divided_distance, self.cls)
+        self.assertAlmostEqual(divided_distance.kilometers, 1.0)
 
     def test_should_be_able_to_take_absolute_value_of_distances(self):
         self.assertAlmostEqual(abs(self.cls(-1.0)).kilometers, 1.0)
@@ -397,3 +416,12 @@ class TestWhenComputingGeodesicDistance(CommonDistanceCases,
             p = d.destination(p2, azi2, -s12/km)
             self.assertAlmostEqual(p.latitude, p1.latitude, delta=1e-13)
             self.assertAlmostEqual(p.longitude, p1.longitude, delta=1e-12)
+
+
+def test_distance_hashing():
+    d1 = Distance(1.0)
+    d2 = GreatCircleDistance(1.0)
+    d3 = GeodesicDistance(1.0)
+    assert d1 == d2 == d3
+    assert hash(d1) == hash(d2) == hash(d3)
+    assert len({d1, d2, d3}) == 1
