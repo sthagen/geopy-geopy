@@ -44,21 +44,27 @@ class TestGoogleV3(BaseTestGeocoder):
         GoogleV3(client_id='client_id', secret_key='secret_key')
 
     async def test_check_status(self):
-        assert self.geocoder._check_status("ZERO_RESULTS") is None
+        def make_error(status, error_message=None):
+            return {
+                "status": status,
+                **({"error_message": error_message} if error_message else {}),
+            }
+
+        assert self.geocoder._check_status(make_error("ZERO_RESULTS")) is None
         with pytest.raises(exc.GeocoderQuotaExceeded):
-            self.geocoder._check_status("OVER_QUERY_LIMIT")
+            self.geocoder._check_status(make_error("OVER_QUERY_LIMIT"))
         with pytest.raises(exc.GeocoderQueryError):
-            self.geocoder._check_status("REQUEST_DENIED")
+            self.geocoder._check_status(make_error("REQUEST_DENIED"))
         with pytest.raises(exc.GeocoderQueryError):
-            self.geocoder._check_status("INVALID_REQUEST")
-        with pytest.raises(exc.GeocoderQueryError):
-            self.geocoder._check_status("_")
+            self.geocoder._check_status(make_error("INVALID_REQUEST"))
+        with pytest.raises(exc.GeocoderServiceError):
+            self.geocoder._check_status(make_error("_"))
 
     async def test_get_signed_url(self):
         geocoder = GoogleV3(
             api_key='mock',
             client_id='my_client_id',
-            secret_key=base64.urlsafe_b64encode('my_secret_key'.encode('utf8'))
+            secret_key=base64.urlsafe_b64encode(b'my_secret_key')
         )
         assert geocoder.premier
         # the two possible URLs handle both possible orders of the request
@@ -79,7 +85,7 @@ class TestGoogleV3(BaseTestGeocoder):
         geocoder = GoogleV3(
             api_key='mock',
             client_id='my_client_id',
-            secret_key=base64.urlsafe_b64encode('my_secret_key'.encode('utf8')),
+            secret_key=base64.urlsafe_b64encode(b'my_secret_key'),
             channel='my_channel'
         )
 
@@ -223,7 +229,7 @@ class TestGoogleV3(BaseTestGeocoder):
 
         tz = pytz.timezone("Etc/GMT-2")
         local_aware_dt = tz.localize(datetime(2010, 1, 1, 2, 0, 0))
-        assert(
+        assert (
             utc_timestamp == self.geocoder._normalize_timezone_at_time(local_aware_dt)
         )
 
@@ -260,7 +266,7 @@ class TestGoogleV3(BaseTestGeocoder):
     async def test_geocode_bounds(self):
         await self.geocode_run(
             {"query": "Washington", "bounds": [[36.47, -84.72], [43.39, -65.90]]},
-            {"latitude": 38.9071923, "longitude": -77.0368707}
+            {"latitude": 40.0, "longitude": -120.7401386, "delta": 8}
         )
 
     async def test_geocode_bounds_invalid(self):

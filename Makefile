@@ -7,6 +7,7 @@ venv:
 
 .PHONY: develop
 develop:
+	pip install wheel
 	pip install -e '.[dev]'
 
 .PHONY: lint lint-flake8 lint-isort
@@ -29,7 +30,7 @@ test-local:
 .PHONY: test
 test: test-local
 	# Run tests with Internet:
-	coverage run -m py.test
+	coverage run -m pytest
 	coverage report
 
 .PHONY: readme_check
