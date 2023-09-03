@@ -94,14 +94,6 @@ Rate Limiter
 
    .. automethod:: __init__
 
-AlgoliaPlaces
--------------
-
-.. autoclass:: geopy.geocoders.AlgoliaPlaces
-   :members:
-
-   .. automethod:: __init__
-
 ArcGIS
 ------
 
@@ -183,6 +175,14 @@ Geocodio
 --------
 
 .. autoclass:: geopy.geocoders.Geocodio
+   :members:
+
+   .. automethod:: __init__
+
+Geokeo
+------------
+
+.. autoclass:: geopy.geocoders.Geokeo
    :members:
 
    .. automethod:: __init__
@@ -339,6 +339,14 @@ What3WordsV3
 ------------
 
 .. autoclass:: geopy.geocoders.What3WordsV3
+   :members:
+
+   .. automethod:: __init__
+
+Woosmap
+------------
+
+.. autoclass:: geopy.geocoders.Woosmap
    :members:
 
    .. automethod:: __init__

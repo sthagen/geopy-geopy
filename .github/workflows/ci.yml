@@ -41,11 +41,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix: # &test-matrix
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', 'pypy-3.7']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12-dev', 'pypy-3.7']
         experimental: [false]
-        include:
-          - python-version: '3.12-dev'
-            experimental: true
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
@@ -62,14 +59,12 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     needs: [lint, check-docs, test_local]
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       fail-fast: false
-      matrix: # *test-matrix  https://github.community/t/support-for-yaml-anchors/16128
-        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', 'pypy-3.7']
+      matrix: # *test-matrix  https://github.com/actions/runner/issues/1182
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11', '3.12-dev', 'pypy-3.7']
         experimental: [false]
-        include:
-          - python-version: '3.12-dev'
-            experimental: true
       max-parallel: 2  # Reduce load on the geocoding services
     steps:
     - uses: actions/checkout@v2
@@ -86,8 +81,6 @@ jobs:
         # GitHub Actions cannot just pass all secrets as env vars :(
         #
         # Please preserve alphabetical order.
-        ALGOLIA_PLACES_API_KEY: ${{ secrets.ALGOLIA_PLACES_API_KEY }}
-        ALGOLIA_PLACES_APP_ID: ${{ secrets.ALGOLIA_PLACES_APP_ID }}
         ARCGIS_PASSWORD: ${{ secrets.ARCGIS_PASSWORD }}
         ARCGIS_REFERER: ${{ secrets.ARCGIS_REFERER }}
         ARCGIS_USERNAME: ${{ secrets.ARCGIS_USERNAME }}
@@ -101,6 +94,7 @@ jobs:
         BING_KEY: ${{ secrets.BING_KEY }}
         GEOCODEEARTH_KEY: ${{ secrets.GEOCODEEARTH_KEY }}
         GEOCODIO_KEY: ${{ secrets.GEOCODIO_KEY }}
+        GEOKEY_KEY: ${{ secrets.GEOKEY_KEY }}
         GEOLAKE_KEY: ${{ secrets.GEOLAKE_KEY }}
         GEONAMES_USERNAME: ${{ secrets.GEONAMES_USERNAME }}
         GOOGLE_KEY: ${{ secrets.GOOGLE_KEY }}
@@ -119,4 +113,5 @@ jobs:
         PICKPOINT_KEY: ${{ secrets.PICKPOINT_KEY }}
         TOMTOM_KEY: ${{ secrets.TOMTOM_KEY }}
         WHAT3WORDS_KEY: ${{ secrets.WHAT3WORDS_KEY }}
+        WOOSMAP_KEY: ${{ secrets.WOOSMAP_KEY }}
         YANDEX_KEY: ${{ secrets.YANDEX_KEY }}

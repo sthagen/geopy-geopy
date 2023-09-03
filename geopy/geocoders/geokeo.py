@@ -1,39 +1,55 @@
 from functools import partial
 from urllib.parse import urlencode
 
-from geopy.exc import GeocoderParseError, GeocoderServiceError
+from geopy.exc import (
+    GeocoderAuthenticationFailure,
+    GeocoderQueryError,
+    GeocoderQuotaExceeded,
+    GeocoderServiceError,
+    GeocoderUnavailable,
+)
 from geopy.geocoders.base import DEFAULT_SENTINEL, Geocoder
 from geopy.location import Location
 from geopy.util import logger
 
-__all__ = ("Yandex", )
+__all__ = ("Geokeo", )
 
 
-class Yandex(Geocoder):
-    """Yandex geocoder.
+class Geokeo(Geocoder):
+    """Geocoder using the geokeo API.
 
     Documentation at:
-        https://tech.yandex.com/maps/doc/geocoder/desc/concepts/input_params-docpage/
+        https://geokeo.com/documentation.php
+
+    .. versionadded:: 2.4
     """
 
-    api_path = '/1.x/'
+    geocode_path = '/geocode/v1/search.php'
+    reverse_path = '/geocode/v1/reverse.php'
 
     def __init__(
             self,
             api_key,
             *,
+            domain='geokeo.com',
+            scheme=None,
             timeout=DEFAULT_SENTINEL,
             proxies=DEFAULT_SENTINEL,
             user_agent=None,
-            scheme=None,
             ssl_context=DEFAULT_SENTINEL,
-            adapter_factory=None,
-            domain='geocode-maps.yandex.ru',
+            adapter_factory=None
     ):
         """
 
-        :param str api_key: Yandex API key, mandatory.
-            The key can be created at https://developer.tech.yandex.ru/
+        :param str api_key: The API key required by Geokeo.com
+            to perform geocoding requests. You can get your key here:
+            https://geokeo.com/
+
+        :param str domain: Domain where the target Geokeo service
+            is hosted.
+
+        :param str scheme:
+            See :attr:`geopy.geocoders.options.default_scheme`.
 
         :param int timeout:
             See :attr:`geopy.geocoders.options.default_timeout`.
@@ -44,9 +60,6 @@ class Yandex(Geocoder):
         :param str user_agent:
             See :attr:`geopy.geocoders.options.default_user_agent`.
 
-        :param str scheme:
-            See :attr:`geopy.geocoders.options.default_scheme`.
-
         :type ssl_context: :class:`ssl.SSLContext`
         :param ssl_context:
             See :attr:`geopy.geocoders.options.default_ssl_context`.
@@ -54,11 +67,6 @@ class Yandex(Geocoder):
         :param callable adapter_factory:
             See :attr:`geopy.geocoders.options.default_adapter_factory`.
 
-            .. versionadded:: 2.0
-
-        :param str domain: base api domain
-
-            .. versionadded:: 2.4
         """
         super().__init__(
             scheme=scheme,
@@ -68,21 +76,28 @@ class Yandex(Geocoder):
             ssl_context=ssl_context,
             adapter_factory=adapter_factory,
         )
+
         self.api_key = api_key
-        self.api = '%s://%s%s' % (self.scheme, domain, self.api_path)
+        self.domain = domain.strip('/')
+        self.api = '%s://%s%s' % (self.scheme, self.domain, self.geocode_path)
+        self.reverse_api = '%s://%s%s' % (self.scheme, self.domain, self.reverse_path)
 
     def geocode(
             self,
             query,
             *,
+            country=None,
             exactly_one=True,
-            timeout=DEFAULT_SENTINEL,
-            lang=None
+            timeout=DEFAULT_SENTINEL
     ):
         """
         Return a location point by address.
 
         :param str query: The address or query you wish to geocode.
+
+        :param str country: Restricts the results to the specified
+            country. The country code is a 2 character code as
+            defined by the ISO 3166-1 Alpha 2 standard (e.g. ``us``).
 
         :param bool exactly_one: Return one result or a list of results, if
             available.
@@ -92,29 +107,19 @@ class Yandex(Geocoder):
             exception. Set this only if you wish to override, on this call
             only, the value set during the geocoder's initialization.
 
-        :param str lang: Language of the response and regional settings
-            of the map. List of supported values:
-
-            - ``tr_TR`` -- Turkish (only for maps of Turkey);
-            - ``en_RU`` -- response in English, Russian map features;
-            - ``en_US`` -- response in English, American map features;
-            - ``ru_RU`` -- Russian (default);
-            - ``uk_UA`` -- Ukrainian;
-            - ``be_BY`` -- Belarusian.
-
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
         params = {
-            'geocode': query,
-            'format': 'json'
+            'api': self.api_key,
+            'q': query,
         }
-        params['apikey'] = self.api_key
-        if lang:
-            params['lang'] = lang
-        if exactly_one:
-            params['results'] = 1
+
+        if country:
+            params['country'] = country
+
         url = "?".join((self.api, urlencode(params)))
+
         logger.debug("%s.geocode: %s", self.__class__.__name__, url)
         callback = partial(self._parse_json, exactly_one=exactly_one)
         return self._call_geocoder(url, callback, timeout=timeout)
@@ -124,9 +129,7 @@ class Yandex(Geocoder):
             query,
             *,
             exactly_one=True,
-            timeout=DEFAULT_SENTINEL,
-            kind=None,
-            lang=None
+            timeout=DEFAULT_SENTINEL
     ):
         """
         Return an address by location point.
@@ -144,75 +147,62 @@ class Yandex(Geocoder):
             exception. Set this only if you wish to override, on this call
             only, the value set during the geocoder's initialization.
 
-        :param str kind: Type of toponym. Allowed values: `house`, `street`, `metro`,
-            `district`, `locality`.
-
-        :param str lang: Language of the response and regional settings
-            of the map. List of supported values:
-
-            - ``tr_TR`` -- Turkish (only for maps of Turkey);
-            - ``en_RU`` -- response in English, Russian map features;
-            - ``en_US`` -- response in English, American map features;
-            - ``ru_RU`` -- Russian (default);
-            - ``uk_UA`` -- Ukrainian;
-            - ``be_BY`` -- Belarusian.
-
         :rtype: ``None``, :class:`geopy.location.Location` or a list of them, if
             ``exactly_one=False``.
         """
 
         try:
-            point = self._coerce_point_to_string(query, "%(lon)s,%(lat)s")
+            lat, lng = self._coerce_point_to_string(query).split(',')
         except ValueError:
             raise ValueError("Must be a coordinate pair or Point")
+
         params = {
-            'geocode': point,
-            'format': 'json'
+            'api': self.api_key,
+            'lat': lat,
+            'lng': lng
         }
-        params['apikey'] = self.api_key
-        if lang:
-            params['lang'] = lang
-        if kind:
-            params['kind'] = kind
-        url = "?".join((self.api, urlencode(params)))
+
+        url = "?".join((self.reverse_api, urlencode(params)))
+
         logger.debug("%s.reverse: %s", self.__class__.__name__, url)
         callback = partial(self._parse_json, exactly_one=exactly_one)
         return self._call_geocoder(url, callback, timeout=timeout)
 
-    def _parse_json(self, doc, exactly_one):
-        """
-        Parse JSON response body.
-        """
-        if doc.get('error'):
-            raise GeocoderServiceError(doc['error']['message'])
+    def _parse_json(self, page, exactly_one=True):
+        places = page.get('results', [])
+        self._check_status(page)
+        if not places:
+            return None
 
-        try:
-            places = doc['response']['GeoObjectCollection']['featureMember']
-        except KeyError:
-            raise GeocoderParseError('Failed to parse server response')
-
-        def parse_code(place):
-            """
-            Parse each record.
-            """
-            try:
-                place = place['GeoObject']
-            except KeyError:
-                raise GeocoderParseError('Failed to parse server response')
-
-            longitude, latitude = (
-                float(_) for _ in place['Point']['pos'].split(' ')
-            )
-
-            name_elements = ['name', 'description']
-            location = ', '.join([place[k] for k in name_elements if place.get(k)])
-
+        def parse_place(place):
+            '''Get the location, lat, lng from a single json place.'''
+            location = place.get('formatted_address')
+            latitude = place['geometry']['location']['lat']
+            longitude = place['geometry']['location']['lng']
             return Location(location, (latitude, longitude), place)
 
         if exactly_one:
-            try:
-                return parse_code(places[0])
-            except IndexError:
-                return None
+            return parse_place(places[0])
         else:
-            return [parse_code(place) for place in places]
+            return [parse_place(place) for place in places]
+
+    def _check_status(self, page):
+        status = (page.get("status") or "").upper()
+
+        # https://geokeo.com/documentation.php#responsecodes
+        if status == "OK":
+            return
+        if status == 'ZERO_RESULTS':
+            return
+
+        if status == 'INVALID_REQUEST':
+            raise GeocoderQueryError('Invalid request parameters')
+        elif status == "ACCESS_DENIED":
+            raise GeocoderAuthenticationFailure('Access denied')
+        elif status == "OVER_QUERY_LIMIT":
+            raise GeocoderQuotaExceeded('Over query limit')
+        elif status == "INTERNAL_SERVER_ERROR":  # not documented
+            raise GeocoderUnavailable('Internal server error')
+        else:
+            # Unknown (undocumented) status.
+            raise GeocoderServiceError('Unknown error')

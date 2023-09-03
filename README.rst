@@ -5,8 +5,8 @@ geopy
     :target: https://pypi.python.org/pypi/geopy/
     :alt: Latest Version
 
-.. image:: https://img.shields.io/github/workflow/status/geopy/geopy/CI?style=flat-square
-    :target: https://github.com/geopy/geopy/actions
+.. image:: https://img.shields.io/github/actions/workflow/status/geopy/geopy/ci.yml?branch=master&style=flat-square
+    :target: https://github.com/geopy/geopy/actions/workflows/ci.yml?query=branch%3Amaster
     :alt: Build Status
 
 .. image:: https://img.shields.io/github/license/geopy/geopy.svg?style=flat-square
@@ -31,7 +31,7 @@ Geocoder classes are located in `geopy.geocoders`_.
 .. _Geocoders doc section: https://geopy.readthedocs.io/en/latest/#geocoders
 .. _geopy.geocoders: https://github.com/geopy/geopy/tree/master/geopy/geocoders
 
-geopy is tested against CPython (versions 3.7, 3.8, 3.9, 3.10, 3.11)
+geopy is tested against CPython (versions 3.7, 3.8, 3.9, 3.10, 3.11, 3.12)
 and PyPy3. geopy 1.x line also supported CPython 2.7, 3.4 and PyPy2.
 
 © geopy contributors 2006-2018 (see AUTHORS) under the `MIT
