@@ -1,4 +1,5 @@
 import contextlib
+import functools
 import json
 import os
 from abc import ABC, abstractmethod
@@ -38,6 +39,26 @@ class SkipIfMissingEnv(dict):
 env = SkipIfMissingEnv(_env)
 
 
+def asyncgen_classmethod_pytest91(func):
+    # pytest 9.1+ requires a classmethod.
+    # Older pytest doesn't work with it.
+
+    if pytest.version_tuple >= (9, 1):
+        return classmethod(func)
+
+    @functools.wraps(func)
+    async def wrapper(_, request, *args, **kwargs):
+        cls = request.cls
+        gen = func(cls, request, *args, **kwargs)
+        try:
+            item = await gen.__anext__()
+            yield item
+        finally:
+            await gen.aclose()
+
+    return wrapper
+
+
 class BaseTestGeocoder(ABC):
     """
     Base for geocoder-specific test cases.
@@ -47,9 +68,9 @@ class BaseTestGeocoder(ABC):
     delta = 0.5
 
     @pytest.fixture(scope='class', autouse=True)
-    async def class_geocoder(_, request, patch_adapter, is_internet_access_allowed):
+    @asyncgen_classmethod_pytest91
+    async def class_geocoder(cls, request, patch_adapter, is_internet_access_allowed):
         """Prepare a class-level Geocoder instance."""
-        cls = request.cls
         env.is_internet_access_allowed = is_internet_access_allowed
 
         geocoder = cls.make_geocoder()
